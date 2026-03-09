@@ -1,0 +1,68 @@
+---
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+------------------------------------------------------------------------
+
+title: --Cleaning data for Statistical Analysis of Alaska Commerical Salmon--
+
+format: html 
+Author: Tymesha Bovell
+
+Introduction: This analysis uses commercial salmon catch data fromAlaska to examine differences in salmon harvest across regions andyears. The annual catch records was reported the Alaska Department ofFish and Game report from 1878 to 1997. The reported dataset
+specifically includes annual catch records for Chinook, Sockeye, Coho,Pink, and Chum salmon. These data are useful because they can helpassessment of long-term patterns in salmon harvest and consider how
+management practices and environmental change may influence commercialfisheries. In addition, this report shows how R functions from libraries: readr,dplyr, and tidyr can be used to clean, reshape, and summarize the
+dataset for analysis.
+
+Code:
+
+In R, operator \<- saves the result of an operation as a variable.
+
+The pipe operator %\>% passes the output from one step into the next
+function, allowing multiple data-cleaning steps to be chained together.
+
+Data: The dataset used in this report is the Alaska commercial salmon catch dataset from the Knowledge Network for Biocomplexity (KNB) repository.The dataset was downloaded on March 5, 2026.
+
+
+Code Analysis:
+
+```{r}
+#The readr, dplyr, and tidyr libraries were loaded to read the dataset, clean and manipulate the data, and restructure.#
+library(tidyverse)
+
+catch_original <-read_csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1")
+
+# Creates a new object called mean_region and sends catch_original into the next function using %>%
+mean_region <- catch_original %>%
+
+  # select() removes the columns All and notesRegCode because they are not needed
+  select(-All, -notesRegCode) %>%
+
+  # mutate() replaces the incorrect Chinook value "I" with "1"
+  mutate(Chinook = if_else(Chinook == "I", "1", Chinook)) %>%
+
+  # mutate() converts the Chinook column from character values to numeric values
+  mutate(Chinook = as.numeric(Chinook)) %>%
+
+  # pivot_longer() reshapes the dataset from wide format to long format which turns species columns into 2 columns called species and catch
+  pivot_longer(-c(Region, Year), names_to = "species", values_to = "catch") %>%
+
+  # mutate() , converts catch values from thousands?
+  mutate(catch = catch * 1000) %>%
+
+  # group_by() , groups the rows by Region for separate calculations for each region
+  group_by(Region) %>%
+
+  # summarize(), calculates the average catch for each region
+  summarize(mean_catch = mean(catch)) %>%
+
+  # arrange() ,arranges the regions in descending order
+  arrange(desc(mean_catch))
+
+# head(), displays rows of the mean_region table
+head(mean_region)
+```
+
+Discussion: The results show the average salmon catch across Alaska fishing regions. The Southeast region (SSE) has the highest mean catch, whereas the South Peninsula region (SOP) has the lowest average catch. This suggests that salmon harvest levels vary across regions. Further analysis could examine whether these differences are related to variations in salmon populations, environmental conditions, fishing activity depending on the region, or harvesting patterns among different salmon species.
