@@ -67,5 +67,3 @@ head(mean_region)
 
 Discussion: The results show the average salmon catch across Alaska fishing regions. The Southeast region (SSE) has the highest mean catch, whereas the South Peninsula region (SOP) has the lowest average catch. This suggests that salmon harvest levels vary across regions. Further analysis could examine whether these differences are related to variations in salmon populations, environmental conditions, fishing activity depending on the region, or harvesting patterns among different salmon species.
   workflow_dispatch: 
-
-<!-- PR triggered -->
