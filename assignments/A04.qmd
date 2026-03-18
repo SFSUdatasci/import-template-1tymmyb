@@ -1,0 +1,102 @@
+---
+title: "Bird Data Tidy Data and Joins"
+author: "Tymesha Bovell"
+date: "March 12, 2026"
+
+  
+#Introduction: This assignment primarily used libraries `lubridate` and `dplyr` to clean organize bird observation data. The object was to extract the month from the survey date, keep only selected parks, then calculate the total number of birds observed by park and month.
+
+
+#Data: The dataset was retrieved from the Environmental Data Initiative dataset, "Ecological and social Interactions in urban parks: bird surveys in local parks in the central Arizona-Phoenix metropolitan area" (Warren et al., 2021). This dataset contains bird survey records from parks in the Phoenix metropolitan area, including survey dates, park names, and bird observations.
+---
+
+```{r}
+##Load the appropiate librarys
+library(readr)
+library(dplyr)
+library(here)
+library(lubridate)
+```
+
+```{r}
+#Load csv file
+birds <- read_csv("../data/raw/join_bird/52_pp52_birds_1.csv")
+sites <- read_csv("../data/raw/join_bird/52_pp52_sites_1.csv")
+surveys <- read_csv("../data/raw/join_bird/52_pp52_surveys_1.csv")
+taxalist <- read_csv("../data/raw/join_bird/52_pp52_taxalist_1.csv")
+
+
+bird_obs_subset <- birds %>% 
+  full_join(y = taxalist, by = "species_id") %>% 
+  full_join(y = sites, by = "site_id") %>% 
+  full_join(y = surveys, by = c("site_id", "survey_id")) %>%
+  select(survey_date, common_name, park_name, bird_count, observer)
+unique(bird_obs_subset$observer)
+#
+bird_obs_subset <- bird_obs_subset %>% 
+  mutate(observer = if_else(condition = observer == "Josh Burns", 
+                            true = "J. Burns", 
+                            false = observer))
+
+unique(bird_obs_subset$observer)
+```
+
+ANALYSIS:
+
+```{r}
+#------ join datasets -----:
+bird_obs_subset <- birds %>%
+
+# join species data using species_id
+  full_join(y = taxalist, by = "species_id") %>%
+
+# join site data using site_id
+  full_join(y = sites, by = "site_id") %>%
+
+# join survey data using site_id and survey_id
+  full_join(y = surveys, by = c("site_id", "survey_id")) %>%
+
+# keep only the columns needed for this assignment
+  select(survey_date, common_name, park_name, bird_count, observer)
+
+
+#------ clean observer names -----:
+bird_obs_subset <- bird_obs_subset %>%
+
+# change Josh Burns to J. Burns
+  mutate(observer = if_else(condition = observer == "Josh Burns",
+                            true = "J. Burns",
+                            false = observer))
+
+
+#------ filter by park, extract month, and move month column -----:
+bird_obs_subset <- bird_obs_subset %>%
+
+# filter to only Lindo, Orme, Palomino, and Sonrisa
+  filter(park_name %in% c("Lindo", "Orme", "Palomino", "Sonrisa")) %>%
+
+# extract month number from survey_date into new variable survey_month
+  mutate(survey_month = factor(month(survey_date))) %>%
+
+# move survey_month to be directly after survey_date
+  relocate(survey_month, .after = survey_date)
+
+
+#------ summarize the dataset -----:
+birds_by_park_month <- bird_obs_subset %>%
+
+# organize the data into groups based on park and month
+  group_by(park_name, survey_month) %>%
+
+# sum bird_count for each park and month, ignoring missing values
+  summarize(total_birds = sum(bird_count, na.rm = TRUE), .groups = "drop")
+  
+# print (display) the final summarized data frame
+birds_by_park_month
+```
+
+#Conclusion:The final data table shows the total number of birds observed at each park grouped by month. The results are informative because they allow comparison of bird activity across Lindo, Orme, Palomino, and Sonrisa over time. For example, Lindo shows a high number of bird observations in September, while other parks such as Palomino and Sonrisa show more moderate counts across multiple months.
+
+The output is useful because it clearly summarizes large amounts of observational data into a simple structure that highlights seasonal patterns. However, there are some rows where `survey_month` is NA with a total of 0 birds, which likely come from missing survey dates. These rows could be removed to improve clarity.
+
+To further improve the wrangling process, the month values could be converted from numeric values to labeled names (e.g., January, February) for better readability. Additionally, visualizing the data (e.g., with a bar plot) would make trends across parks and months easier to interpret.
