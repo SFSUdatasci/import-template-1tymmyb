@@ -1,0 +1,55 @@
+---
+title: "Activity Assay Analysis of Fluorescent Fusion Enzyme SMOB Reductase"
+author: "Tymesha Bovell"
+date: "March 22, 2026"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+execute:
+  warning: false
+  message: false
+---
+
+## Introduction
+
+This dataset comes from an activity assay used to measure the function of a purified enzyme. The protein studied is an engineered fusion composed of a 6xHis purification tag, a fluorescent marker (mScarlet), and the enzyme SMOB (Styrene Monooxygenase B) from *Pseudomonas putida*.
+
+In this experiment, enzyme activity was monitored through a redox reaction in which NADH donates electrons to FAD, a cofactor required for SMOB function. Absorbance was measured at 450 nm, which corresponds to the oxidized form of FAD. As the reaction proceeds and FAD is reduced, the absorbance at 450 nm decreases over time. The dataset represents a time-course measurement of absorbance at a fixed wavelength (450 nm). Understanding whether this dataset is tidy is important because tidy data ensures that each variable, observation, and value is clearly organized, allowing for accurate analysis of enzyme activity over time.
+
+## Data
+
+The dataset was generated from recorded absorbance measurements of tagged SMOB reductase samples.
+
+```{r}
+# Load libraries
+library(here)
+library(readr)
+library(dplyr)
+# imports the dataset from the data/raw folder
+biochem_abs <- read_csv(here::here("data/raw", "A450.csv"))
+
+# shows the first few rows of the dataset
+head(biochem_abs)
+
+# shows the column names
+colnames(biochem_abs)
+
+# shows the structure of the dataset
+glimpse(biochem_abs)
+
+
+
+```
+
+## Analysis
+
+A tidy dataset follows three main principles where each column represents a variable, each row represents an observation, and each cell contains a single value. The dataset is not tidy because the columns do not show variable names. Instead, numerical values from the first row were interpreted as column headers during import, which does not describe the variables being measured.
+
+The first column should represent time, and the second column represents absorbance at 450 nm. Each row corresponds to a single observation of absorbance at a specific time point, and each cell contains a single value.
+
+The primary key in this dataset is the time variable, since each time point uniquely identifies an observation. There are no foreign keys because the dataset is not associated to any additional tables.
+
+## Conclusion
+
+The dataset initially did not follow tidy data principles due to unclear column names. In the future labeling the variables as time and absorbance, the data becomes tidy and suitable for analysis for clear interpretation of absorbance changes over time, reflecting enzyme activity at 450 nm.
