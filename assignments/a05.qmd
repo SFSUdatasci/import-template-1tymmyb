@@ -1,0 +1,123 @@
+---
+title: "Socioecological Monitoring of Visitor Activity in the Sacramento-San Joaquin Delta"
+author: "Tymesha Bovell"
+date: "March 27, 2026"
+format:
+  html:
+    toc: true
+---
+
+## Introduction
+
+Understanding how people interact with restoration areas is important for environmental management and conservation. By analyzing socioecological monitoring data from the Sacramento-San Joaquin Delta, we can identify which locations experience the most human activity and how those patterns vary across space. This analysis uses data visualization to better understand visitor distribution and site accessibility.
+
+------------------------------------------------------------------------
+
+## Data
+
+The dataset was obtained from the EDI Data Repository for Sacramento-San Joaquin Delta socioecological monitoring. The CSV dataset file recovered and uploaded. The dataset includes restoration locations, geographic coordinates, and counts of different visitor types.
+
+```{r}
+# load packages needed for reading, cleaning, reshaping, and visualizing data
+library(readr)
+library(dplyr)
+library(tidyr)
+library(forcats)
+library(ggplot2)
+library(leaflet)
+library(DT)
+library(scales)
+library(janitor)
+library(viridis)
+library(here)
+
+# read the csv file from the data/raw folder in the project directory
+delta_traffic <- read_csv(here::here("data/raw", "Socioecological_monitoring_data.csv"))
+
+# clean column names to lowercase and consistent format for easier use
+delta_visits <- delta_traffic %>% 
+  clean_names()
+
+# convert multiple visitor columns into two columns (visitor type and quantity)
+visits_long <- delta_visits %>% 
+  pivot_longer(
+    cols = c(sm_boat, med_boat, lrg_boat, bank_angler, scientist, cars), # select visitor columns
+    names_to = "visitor_type", # new column for type of visitor
+    values_to = "quantity" # new column for number of visitors
+  ) %>%
+  rename(restore_loc = eco_restore_approximate_location) %>% # shorten long column name
+  select(-notes) # remove notes column since it is not needed
+
+# preview the cleaned and reshaped dataset
+head(visits_long)
+```
+
+------------------------------------------------------------------------
+
+## Analysis
+
+### Plot of visits by restoration location
+
+```{r}
+# group data by location and calculate total visits at each site
+daily_visits_loc <- visits_long %>%
+  group_by(restore_loc) %>% # group rows by location
+  summarise(daily_visits = sum(quantity, na.rm = TRUE), .groups = "drop") # sum visits
+
+# create a bar plot showing total visits at each restoration location
+ggplot(data = daily_visits_loc,
+       aes(x = restore_loc, y = daily_visits)) + # map location to x-axis and visits to y-axis
+  geom_col(fill = "steelblue") + # create bars with color
+  labs(
+    x = "Restoration Location", # label x-axis
+    y = "Total Visits", # label y-axis
+    title = "Total Visits by Restoration Location",
+    subtitle = "Sacramento-San Joaquin Delta monitoring data"
+  ) +
+  theme_bw() + # apply clean theme
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # rotate labels for readability
+```
+
+This plot shows that visitor activity varies across locations. Prospect and Grizzly Bay have the highest visitation, while Sherman Island and Wildlands have very low activity.
+
+------------------------------------------------------------------------
+
+### Map of restoration locations
+
+```{r}
+# keep only one row per location with coordinates
+locations <- visits_long %>%
+  distinct(restore_loc, .keep_all = TRUE) %>% # remove duplicates
+  select(restore_loc, latitude, longitude) # keep only needed columns
+
+# create an interactive map showing each restoration location
+leaflet(locations) %>%
+  addProviderTiles(providers$Esri.WorldImagery) %>% # add satellite base map
+  addProviderTiles(providers$CartoDB.PositronOnlyLabels) %>% # add labels
+  addCircleMarkers(
+    lng = ~longitude, # longitude for x-position
+    lat = ~latitude, # latitude for y-position
+    popup = ~restore_loc, # show location name when clicked
+    radius = 5, # size of markers
+    fillColor = "salmon", # marker color
+    fillOpacity = 1, # marker fill visibility
+    stroke = TRUE, # outline marker
+    weight = 0.5,
+    color = "white",
+    opacity = 1
+  )
+```
+
+The map shows that locations with higher visitation tend to be near accessible waterways and populated areas such as Rio Vista.
+
+------------------------------------------------------------------------
+
+## Conclusion
+
+The results show clear differences in visitor activity across restoration locations in the Sacramento-San Joaquin Delta. From the bar plot, Prospect and Grizzly Bay have the highest number of total visits, indicating that these sites experience the most human activity. In contrast, locations such as Sherman Island and Wildlands have much lower visitation, suggesting they are less frequently accessed or monitored.
+
+These differences may reflect factors such as accessibility, popularity for recreation, or proximity to populated areas. Sites with higher visitation may be more impacted by human activity, while lower-traffic areas may experience less disturbance.
+
+The map provides important spatial context for these patterns. It shows that many of the restoration sites are distributed along waterways and near towns such as Rio Vista and Antioch.
+
+Together, the plot and map complement each other by showing both the amount of visitation and the geographic distribution of sites. This combined visualization helps provide a clearer understanding of how human activity is distributed across the Delta and highlights which restoration areas may require more attention or management. Locations with higher visitation could be furthered studied to determine if they are closer to accessible routes and developed areas.
