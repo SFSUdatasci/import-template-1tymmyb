@@ -1,0 +1,58 @@
+---
+---
+title: "Tidy Data for fluorescent marker"
+subtitle: "Exicitation and Emission Spectra for Fluorescently tagged SMOB Reductase"
+author: Tymesha Bovell
+format:
+  html:
+    toc: true
+    toc-depth: 3
+execute:
+  warning: false
+  message: false
+---
+
+# Introduction
+
+This data contains excitation and emission fluorscence spectra for the mScarlett fluorescent protein fused to my SMOB reductase enzyme. This datset includes wavelength dependent fluorescence intensity measurements
+## About the data
+
+The dataset used here is `Emission.csv` and `Excitation.csv` 
+
+-   Date downloaded: Febuary 26th, 2026
+-   Download source: 
+You will explore the nitrogen to phosphate ratio, which indicates the health of the ocean ecosystem. <https://beal-agulhas.earth.miami.edu/teaching/courses/lecture-five/index.html>
+
+## Setup
+
+Best practice: put all `library()` calls in one chunk near the top so collaborators can see what packages are required.
+
+```{r}
+library(here)
+library(readr)
+```
+
+# Read in the data
+
+Quarto runs R in the same way as a script: objects only exist after the chunks that create them have been run.
+
+Using `here()` is a convenient way to build paths relative to your project root (e.g., your `.qmd` might live in `scripts/` while data lives in `data/`).
+
+```{r}
+biochem_em <- read_csv(here::here("data/raw",  "Emission.csv"))
+biochem_ex <- read_csv(here::here("data/raw", "Excitation.csv"))
+
+
+
+#(Optional) Quick peek at the data:
+
+# Uncomment if you want more inspection output
+ names(biochem_em)
+ names(biochem_ex)
+# str(biochem_em)
+ # str(biochem_ex)
+# head(biochem_em)
+# head(biochem_ex)
+# summary(biochem_em)
+# summary(biochem_ex)
+```

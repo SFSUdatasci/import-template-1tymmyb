@@ -1,0 +1,21 @@
+---
+title: "Decision Log entry for Alaska"
+author: "Tymesha Bovell"
+editor: visual
+---
+
+## Decision Log
+
+### Decision 1: Use Alaska Albers (EPSG:3338) for the spatial join
+
+I transformed both the Alaska region polygons and the population point data into Alaska Albers (EPSG:3338) before doing the spatial join. I chose this CRS because the tutorial identifies Alaska Albers as a good projected coordinate system for Alaska, and the map looks cleaner after transforming from WGS84. The spatial join also required both layers to have the same CRS, because trying to join WGS84 population points with Alaska Albers region polygons caused a CRS mismatch error. Using EPSG:3338 made the join work correctly and kept the Alaska data in a projection appropriate for the study area.
+
+### Decision 2: Used `st_within` instead of `st_intersects`
+
+I used `st_within` for the spatial join because the goal was to assign each community point to the Alaska region polygon that contains it. Since the population data are point locations and the regions are polygons, `st_within` answers the question: “Which region does this city fall inside?” `st_intersects` could also return matches when geometries touch or overlap, but for this analysis I wanted a stricter point-in-polygon relationship so each community would be assigned based on being inside a region.
+
+### Decision 3: ggspatial basemap was useful for context but not necessary for the main analysis
+
+The ggspatial basemap added visual context by showing Alaska with an OpenStreetMap background. However, it was not necessary for the actual population-by-region analysis. The main analysis depended on the Alaska region polygons, population points, CRS transformation, and spatial join. The basemap helped make the map easier to interpret visually, but it did not change the spatial join results.
+
+.

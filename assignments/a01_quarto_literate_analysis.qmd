@@ -12,7 +12,7 @@ execute:
 
 # Introduction
 
-This Quarto document follows the **Section 5.7 practice exercise** from coreR *Session 05 (Literate Analysis with Quarto)*: building a simple **prose + code** analysis using real seawater chemistry data (`BGchem2008data.csv`).\
+This Quarto document follows the **Section 5.7 practice exercise** from coreR *Session 05 (Literate Analysis with Quarto)*: building a simple **prose + code** analyquarto preview a01_quarto_literate_analysis.qmd --to htmlsis using real seawater chemistry data (`BGchem2008data.csv`).\
 Source: <https://learning.nceas.ucsb.edu/2024-10-coreR/session_05.html>
 
 ## About the data
@@ -40,12 +40,16 @@ Quarto runs R in the same way as a script: objects only exist after the chunks t
 Using `here()` is a convenient way to build paths relative to your project root (e.g., your `.qmd` might live in `scripts/` while data lives in `data/`).
 
 ```{r}
-bg_chem <- read_csv(here::here("data", "BGchem2008data.csv"))
+bg_chem <- read_csv(here::here("data/raw", "BGchem2008data.csv"))
 ```
 
-(Optional) Quick peek at the data:
-
 ```{r}
+bg_chem_dat <- read.csv(
+  here::here("data", "raw", "BGchem2008data.csv"),
+  stringsAsFactors = FALSE
+)
+#(Optional) Quick peek at the data:
+
 # Uncomment if you want more inspection output
  names(bg_chem)
 # str(bg_chem)
@@ -104,3 +108,11 @@ In this mini-analysis, we:
 -   Created a basic plot relating total nitrogen to phosphate
 
 This is the core idea of **literate analysis**: combine narrative and code in one document so the workflow is easier to understand and reproduce.
+
+# Analysis of the Redfield Ratio:
+
+The Redfield ratio (C:N:P = 106:16:1, or N:P =16:1) which represents the average molar ratio of nitrogen to phosphorus found in marine phytoplankton and deep ocean nutrients. It is widely used as a benchmark for evaluating nutrient balance in marine ecosystems. By comparing observed nitrogen to phosphate ratios with the Redfield value, we can assess whether an ecosystem is relatively nitrogen-limited or phosphorus-limited. Because nitrogen and phosphorus are essential nutrients for primary productivity, deviations from the Redfield ratio provide information about ecosystem health and nutrient cycling dynamics. In this analysis, the nitrogen to phosphate ratio was calculated from real seawater chemistry data and compared it to the Redfield expectation to evaluate nutrient balance in these ocean samples.
+
+The calculated mean nitrogen to phosphate ratio for this dataset is approximately 6.2, which is lower than the classical Redfield ratio of 16. This indicates that, on average, nitrogen is present in lower proportion relative to phosphorus compared to the global marine benchmark. The plot of total nitrogen (NO2 + NO3 + NH4) versus phosphate shows a clear positive relationship: as phosphate concentration increases, total nitrogen also increases. However, the slope of the relationship is noticeably shallower than what would be expected by the strict 16:1 Redfield proportion. For example, at phosphate values near 1.0, total nitrogen values cluster around 2–3 or around 12–13, rather than near 16. Across the full range of phosphate concentrations (approximately 0.6 to 1.8), total nitrogen increases from near 0 up to about 16, but not in a pattern consistent with a 16:1 ratio. This visual pattern aligns with the calculated mean ratio of 6, reinforcing that nitrogen is relatively scarce compared to phosphorus in these samples.
+
+Overall, the nitrogen to phosphate ratio in these ocean water samples (6:1) is significantly lower than the Redfield ratio (16:1). This implies that the sampled waters may be relatively nitrogen-limited, meaning primary productivity in this region could be more constrained by nitrogen availability than by phosphorus.These types of deviations from the Redfield ratio are can occur in real marine systems and can result from factors such as scarce nutrient inputs, biological uptake, water mass mixing, or seasonal variability. It is important to recognize that the Redfield ratio represents a global average rather than a strict rule. However, the substantial difference between the observed ratio (6) and the Redfield value (16) suggests an impactful ecological variation in nutrient balance within this dataset.
